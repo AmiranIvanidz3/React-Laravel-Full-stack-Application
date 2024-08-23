@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef,useState } from "react"
 import { Link, } from "react-router-dom"
 import axiosClient from "../axios-client";
 import { useStateContext } from "../contexts/ContextProvider.jsx"
@@ -11,7 +11,9 @@ export default function Signup(){
     const passwordRef = useRef();
     const passwordConfirmationRef = useRef();
 
-    const {setUser, setToken} = useStateContext()
+    const {setUser, setToken} = useStateContext(null)
+
+    const [errors, setErrors] = useState(null);
 
 
     const onSubmit = (e) => {
@@ -24,7 +26,7 @@ export default function Signup(){
 
         }
 
-        console.log(payload)
+        
         axiosClient.post("/signup", payload)
         .then(( {data} ) => { 
             setUser(data.user),
@@ -33,8 +35,7 @@ export default function Signup(){
          .catch( err => {
             const response = err.response;
             if (response && response.status === 422) {
-                console.log(
-                    response.data.errors)
+                setErrors(response.data.errors)
             }
          }) 
     }
@@ -46,6 +47,13 @@ export default function Signup(){
              <h1 className="title">
                     Register
              </h1>
+             {errors && (
+                <div className="alert">
+                    {Object.keys(errors).map(key => (
+                        <p key={key}>{errors[key][0]}</p>
+                    ))}
+                </div>
+             )}
 
              <input ref={nameRef} type="text" placeholder="Full Name"/>
              <input ref={emailRef} type="email" placeholder="E/MaiL Address"/>
@@ -53,7 +61,7 @@ export default function Signup(){
              <input ref={passwordConfirmationRef}  type="password" placeholder="Passowrd Confirmation"/>
              <button  className="btn btn-block">Sign Up</button>
              <p className="message">
-                Already Registered <Link to="/login">Let's Login</Link>
+                Already Registered <Link to="/login">Lets Login</Link>
              </p>
          </form>
         </div>
